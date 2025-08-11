@@ -14,7 +14,7 @@
         <!-- ===== Sidebar ===== -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,16.5L6.5,12L7.91,10.59L11,13.67L16.09,8.59L17.5,10L11,16.5Z"></path></svg>
+                <svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 8L3 11L7 14M17 8L21 11L17 14M14 4L10 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <h1 class="logo-text">DevKit</h1>
             </div>
             <nav class="sidebar-nav">
@@ -26,92 +26,93 @@
             </nav>
         </aside>
 
-        <!-- ===== Main Content ===== -->
-        <main class="main-content">
-            <!-- Tool: API Mocker -->
-            <div id="tool-mockify" class="tool-container">
-                <header class="tool-header">
-                    <h2>Instant API Mocker</h2>
-                    <p>Paste any valid JSON to generate an instant, shareable mock API endpoint.</p>
-                </header>
-                <div class="tool-body">
-                    <textarea id="mockify-input" class="code-input" placeholder='{ "message": "Hello, DevKit!" }'></textarea>
-                    <button id="mockify-submit" class="btn btn-primary">Create Mock API</button>
-                    <div id="mockify-result" class="result-box hidden"></div>
-                </div>
-            </div>
+        <!-- ===== Main Wrapper ===== -->
+        <div class="main-wrapper">
+            <header class="main-header">
+                <h2 id="page-title">API Mocker</h2>
+            </header>
 
-            <!-- Tool: Regex Builder -->
-            <div id="tool-regex" class="tool-container hidden">
-                <header class="tool-header">
-                    <h2>AI-Powered Regex Builder</h2>
-                    <p>Describe what you want to match in plain English, and let AI build the regex for you.</p>
-                </header>
-                <div class="tool-body">
-                    <input type="text" id="regex-input" class="text-input" placeholder="e.g., a valid email address">
-                    <button id="regex-submit" class="btn btn-primary">Generate Regex</button>
-                    <div id="regex-result" class="result-box hidden"></div>
-                </div>
-            </div>
-
-            <!-- Tool: Config Converter -->
-            <div id="tool-config" class="tool-container hidden">
-                <header class="tool-header">
-                    <h2>Universal Config Converter</h2>
-                    <p>Seamlessly convert between JSON, YAML, and TOML formats.</p>
-                </header>
-                <div class="tool-body io-grid">
-                    <div class="io-panel">
-                        <div class="io-header">
-                            <label for="config-from">From:</label>
-                            <select id="config-from">
-                                <option value="json">JSON</option><option value="yaml">YAML</option><option value="toml">TOML</option>
-                            </select>
-                        </div>
-                        <textarea id="config-input" class="code-input" placeholder="Paste your config here..."></textarea>
-                    </div>
-                    <div class="io-panel">
-                        <div class="io-header">
-                            <label for="config-to">To:</label>
-                            <select id="config-to">
-                                <option value="yaml">YAML</option><option value="json">JSON</option><option value="toml">TOML</option>
-                            </select>
-                        </div>
-                        <textarea id="config-output" class="code-input" readonly></textarea>
-                    </div>
-                </div>
-                 <button id="config-submit" class="btn btn-primary">Convert</button>
-            </div>
-
-            <!-- Tool: SQL Generator -->
-            <div id="tool-sql" class="tool-container hidden">
-                <header class="tool-header">
-                    <h2>AI-Powered SQL Generator</h2>
-                    <p>Provide your table schema and describe the data you need in plain English.</p>
-                </header>
-                <div class="tool-body io-grid">
-                    <textarea id="sql-schema" class="code-input" placeholder="CREATE TABLE users (...);"></textarea>
-                    <textarea id="sql-description" class="code-input" placeholder="e.g., Show me all users from California who signed up this year."></textarea>
-                </div>
-                <button id="sql-submit" class="btn btn-primary">Generate SQL</button>
-                <div id="sql-result" class="result-box hidden"></div>
-            </div>
-
-            <!-- Tool: JSON Beautifier -->
-            <div id="tool-json" class="tool-container hidden">
-                <header class="tool-header">
-                    <h2>JSON Beautifier & Validator</h2>
-                    <p>Paste any JSON to format it beautifully and check for syntax errors.</p>
-                </header>
-                <div class="tool-body">
-                    <textarea id="json-input" class="code-input" placeholder='{"user":{"id":1,"name":"DevKit"}}'></textarea>
-                    <button id="json-submit" class="btn btn-primary">Format JSON</button>
-                    <div id="json-result" class="result-box hidden"></div>
-                </div>
-            </div>
-
-        </main>
+            <main class="main-content">
+                <!-- All tools will be dynamically shown/hidden here -->
+            </main>
+        </div>
     </div>
+
+    <!-- TEMPLATES for each tool -->
+    <template id="template-mockify">
+        <div class="tool-content">
+            <p class="tool-description">Paste any valid JSON to generate an instant, shareable mock API endpoint.</p>
+            <div class="tool-body full-width">
+                <textarea id="mockify-input" class="code-input" placeholder='{ "status": "success", "data": { "id": 123, "name": "DevKit User" } }'></textarea>
+                <div id="mockify-result" class="result-box hidden"></div>
+            </div>
+            <footer class="tool-footer"><button id="mockify-submit" class="btn btn-primary">Create Mock API</button></footer>
+        </div>
+    </template>
+
+    <template id="template-regex">
+        <div class="tool-content">
+            <p class="tool-description">Describe what you want to match in plain English, and let AI build the regex for you.</p>
+            <div class="tool-body">
+                <input type="text" id="regex-input" class="text-input" placeholder="e.g., a valid email address">
+                <div id="regex-result" class="result-box hidden"></div>
+            </div>
+            <footer class="tool-footer"><button id="regex-submit" class="btn btn-primary">Generate Regex</button></footer>
+        </div>
+    </template>
+    
+    <template id="template-config">
+        <div class="tool-content">
+            <p class="tool-description">Seamlessly convert between JSON, YAML, and TOML configuration formats.</p>
+            <div class="tool-options">
+                <div class="option-group">
+                    <label>From:</label>
+                    <div class="btn-group" id="config-from">
+                        <button data-value="json" class="btn-segment active">JSON</button>
+                        <button data-value="yaml" class="btn-segment">YAML</button>
+                        <button data-value="toml" class="btn-segment">TOML</button>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label>To:</label>
+                     <div class="btn-group" id="config-to">
+                        <button data-value="yaml" class="btn-segment active">YAML</button>
+                        <button data-value="json" class="btn-segment">JSON</button>
+                        <button data-value="toml" class="btn-segment">TOML</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tool-body io-grid">
+                <textarea id="config-input" class="code-input" placeholder="Paste your config here..."></textarea>
+                <textarea id="config-output" class="code-input" readonly></textarea>
+            </div>
+            <footer class="tool-footer"><button id="config-submit" class="btn btn-primary">Convert</button></footer>
+        </div>
+    </template>
+
+    <template id="template-sql">
+         <div class="tool-content">
+            <p class="tool-description">Provide your table schema and describe the data you need in plain English.</p>
+            <div class="tool-body io-grid">
+                <textarea id="sql-schema" class="code-input" placeholder="Paste your CREATE TABLE statements here..."></textarea>
+                <textarea id="sql-description" class="code-input" placeholder="Describe the query you want... e.g., Show me all users from California who signed up this year."></textarea>
+            </div>
+            <div id="sql-result" class="result-box hidden"></div>
+            <footer class="tool-footer"><button id="sql-submit" class="btn btn-primary">Generate SQL</button></footer>
+        </div>
+    </template>
+
+    <template id="template-json">
+        <div class="tool-content">
+            <p class="tool-description">Paste any JSON to format it beautifully and check for syntax errors.</p>
+            <div class="tool-body full-width">
+                <textarea id="json-input" class="code-input" placeholder='{"user":{"id":1,"name":"DevKit"}}'></textarea>
+                <div id="json-result" class="result-box hidden"></div>
+            </div>
+            <footer class="tool-footer"><button id="json-submit" class="btn btn-primary">Format JSON</button></footer>
+        </div>
+    </template>
+
     <script src="script.js"></script>
 </body>
 </html>

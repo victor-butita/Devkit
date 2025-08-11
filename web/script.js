@@ -1,13 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- State & Navigation ---
-    const toolContainers = document.querySelectorAll('.tool-container');
+    const mainContent = document.querySelector('.main-content');
     const navLinks = document.querySelectorAll('.nav-link');
+    const pageTitle = document.getElementById('page-title');
 
     function switchTool(toolId) {
-        toolContainers.forEach(c => c.classList.add('hidden'));
-        document.getElementById(`tool-${toolId}`).classList.remove('hidden');
+        mainContent.innerHTML = '';
+        const template = document.getElementById(`template-${toolId}`);
+        if (!template) { console.error(`Template not found: ${toolId}`); return; }
+        const clone = template.content.cloneNode(true);
+        mainContent.appendChild(clone);
+
         navLinks.forEach(l => l.classList.remove('active'));
-        document.querySelector(`.nav-link[data-tool="${toolId}"]`).classList.add('active');
+        const activeLink = document.querySelector(`.nav-link[data-tool="${toolId}"]`);
+        activeLink.classList.add('active');
+        pageTitle.textContent = activeLink.textContent;
+
+        initializeTool(toolId);
     }
 
     navLinks.forEach(link => {
@@ -18,17 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- API Helper ---
-    async function apiCall(endpoint, body) {
-        const response = await fetch(`/api${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || 'An unexpected error occurred.');
+    async function apiCall(endpoint, body, submitButton) {
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Processing...';
+        submitButton.disabled = true;
+        try {
+            const response = await fetch(`/api${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'An unexpected error occurred.');
+            return data;
+        } finally {
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
         }
-        return data;
     }
 
     // --- Result Rendering ---
@@ -40,104 +51,114 @@ document.addEventListener('DOMContentLoaded', () => {
             code.textContent = content;
             pre.appendChild(code);
             resultEl.appendChild(pre);
-        } else {
-            resultEl.innerHTML = content;
-        }
+        } else { resultEl.innerHTML = content; }
         resultEl.classList.remove('hidden');
     }
+    function renderError(resultEl, message) { renderResult(resultEl, `<span style="color:var(--red); font-weight:500;">${message}</span>`, false); }
 
-    // --- Tool: Mockify ---
-    const mockifyInput = document.getElementById('mockify-input');
-    const mockifySubmit = document.getElementById('mockify-submit');
-    const mockifyResult = document.getElementById('mockify-result');
-
-    mockifySubmit.addEventListener('click', async () => {
-        try {
-            const data = await apiCall('/mock/create', JSON.parse(mockifyInput.value));
-            mockifyResult.innerHTML = `
-                <div class="result-url">
-                    <input type="text" value="${data.url}" readonly>
-                    <button class="copy-btn">Copy</button>
-                </div>`;
-            mockifyResult.querySelector('.copy-btn').addEventListener('click', e => {
-                navigator.clipboard.writeText(data.url);
-                e.currentTarget.textContent = 'Copied!';
-            });
-            mockifyResult.classList.remove('hidden');
-        } catch (err) {
-            renderResult(mockifyResult, `<span style="color:var(--red);">${err.message}</span>`, false);
+    // --- Universal Tool Initializer ---
+    function initializeTool(toolId) {
+        const toolContent = mainContent.querySelector('.tool-content');
+        if (!toolContent) return;
+        switch (toolId) {
+            case 'mockify': initMockify(toolContent); break;
+            case 'regex': initRegex(toolContent); break;
+            case 'config': initConfig(toolContent); break;
+            case 'sql': initSql(toolContent); break;
+            case 'json': initJson(toolContent); break;
         }
-    });
+    }
 
-    // --- Tool: RegexCraft ---
-    const regexInput = document.getElementById('regex-input');
-    const regexSubmit = document.getElementById('regex-submit');
-    const regexResult = document.getElementById('regex-result');
+    // --- Tool-specific initializers ---
+    function initMockify(container) {
+        const input = container.querySelector('#mockify-input');
+        const submit = container.querySelector('#mockify-submit');
+        const result = container.querySelector('#mockify-result');
+        submit.addEventListener('click', async () => {
+            try {
+                const data = await apiCall('/mock/create', JSON.parse(input.value), submit);
+                result.innerHTML = `<div class="result-url"><input type="text" value="${data.url}" readonly><button class="copy-btn">Copy</button></div>`;
+                result.querySelector('.copy-btn').addEventListener('click', e => {
+                    navigator.clipboard.writeText(data.url);
+                    const btn = e.currentTarget;
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+                });
+                result.classList.remove('hidden');
+            } catch (err) { renderError(result, err.message); }
+        });
+    }
 
-    regexSubmit.addEventListener('click', async () => {
-        try {
-            const data = await apiCall('/regex/generate', { description: regexInput.value });
-            regexResult.innerHTML = `
-                <pre><code>${data.regex}</code></pre>
-                <div class="explanation">${data.explanation}</div>`;
-            regexResult.classList.remove('hidden');
-        } catch (err) {
-            renderResult(regexResult, `<span style="color:var(--red);">${err.message}</span>`, false);
-        }
-    });
+    function initRegex(container) {
+        const input = container.querySelector('#regex-input');
+        const submit = container.querySelector('#regex-submit');
+        const result = container.querySelector('#regex-result');
+        submit.addEventListener('click', async () => {
+            try {
+                const data = await apiCall('/regex/generate', { description: input.value }, submit);
+                result.innerHTML = `<pre><code>${data.regex}</code></pre><div class="explanation">${data.explanation}</div>`;
+                result.classList.remove('hidden');
+            } catch (err) { renderError(result, err.message); }
+        });
+    }
 
-    // --- Tool: ConfigSwitch ---
-    const configInput = document.getElementById('config-input');
-    const configFrom = document.getElementById('config-from');
-    const configTo = document.getElementById('config-to');
-    const configOutput = document.getElementById('config-output');
-    const configSubmit = document.getElementById('config-submit');
+    function initConfig(container) {
+        const input = container.querySelector('#config-input');
+        const fromGroup = container.querySelector('#config-from');
+        const toGroup = container.querySelector('#config-to');
+        const output = container.querySelector('#config-output');
+        const submit = container.querySelector('#config-submit');
 
-    configSubmit.addEventListener('click', async () => {
-        try {
-            const data = await apiCall('/config/convert', {
-                input: configInput.value,
-                from: configFrom.value,
-                to: configTo.value,
-            });
-            configOutput.value = data.output;
-        } catch (err) {
-            configOutput.value = `Error: ${err.message}`;
-        }
-    });
+        // Logic for custom button groups
+        fromGroup.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                fromGroup.querySelector('.active').classList.remove('active');
+                e.target.classList.add('active');
+            }
+        });
+        toGroup.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                toGroup.querySelector('.active').classList.remove('active');
+                e.target.classList.add('active');
+            }
+        });
 
-    // --- Tool: QueryGen ---
-    const sqlSchema = document.getElementById('sql-schema');
-    const sqlDescription = document.getElementById('sql-description');
-    const sqlSubmit = document.getElementById('sql-submit');
-    const sqlResult = document.getElementById('sql-result');
+        submit.addEventListener('click', async () => {
+            try {
+                const fromVal = fromGroup.querySelector('.active').dataset.value;
+                const toVal = toGroup.querySelector('.active').dataset.value;
+                const data = await apiCall('/config/convert', { input: input.value, from: fromVal, to: toVal }, submit);
+                output.value = data.output;
+            } catch (err) { output.value = `Error: ${err.message}`; }
+        });
+    }
 
-    sqlSubmit.addEventListener('click', async () => {
-        try {
-            const data = await apiCall('/sql/generate', {
-                schema: sqlSchema.value,
-                description: sqlDescription.value,
-            });
-            renderResult(sqlResult, data.query);
-        } catch (err) {
-            renderResult(sqlResult, err.message, false);
-        }
-    });
+    function initSql(container) {
+        const schema = container.querySelector('#sql-schema');
+        const description = container.querySelector('#sql-description');
+        const submit = container.querySelector('#sql-submit');
+        const result = container.querySelector('#sql-result');
+        submit.addEventListener('click', async () => {
+            try {
+                const data = await apiCall('/sql/generate', { schema: schema.value, description: description.value }, submit);
+                renderResult(result, data.query);
+            } catch (err) { renderError(result, err.message); }
+        });
+    }
 
-    // --- Tool: JSON Beautifier ---
-    const jsonInput = document.getElementById('json-input');
-    const jsonSubmit = document.getElementById('json-submit');
-    const jsonResult = document.getElementById('json-result');
+    function initJson(container) {
+        const input = container.querySelector('#json-input');
+        const submit = container.querySelector('#json-submit');
+        const result = container.querySelector('#json-result');
+        submit.addEventListener('click', async () => {
+            try {
+                const data = await apiCall('/json/format', JSON.parse(input.value), submit);
+                renderResult(result, data.formatted_json);
+            } catch (err) { renderError(result, `Invalid JSON: ${err.message}`); }
+        });
+    }
 
-    jsonSubmit.addEventListener('click', async () => {
-        try {
-            const data = await apiCall('/json/format', JSON.parse(jsonInput.value));
-            renderResult(jsonResult, data.formatted_json);
-        } catch (err) {
-            renderResult(jsonResult, `<span style="color:var(--red);">Invalid JSON: ${err.message}</span>`, false);
-        }
-    });
-
-    // --- Initial Setup ---
+    // --- Initial Load ---
     switchTool('mockify');
 });
