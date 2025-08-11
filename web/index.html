@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevKit - The Ultimate Developer Toolkit</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- ===== Sidebar ===== -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,16.5L6.5,12L7.91,10.59L11,13.67L16.09,8.59L17.5,10L11,16.5Z"></path></svg>
+                <h1 class="logo-text">DevKit</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#mockify" class="nav-link active" data-tool="mockify">API Mocker</a>
+                <a href="#regex" class="nav-link" data-tool="regex">Regex Builder</a>
+                <a href="#config" class="nav-link" data-tool="config">Config Converter</a>
+                <a href="#sql" class="nav-link" data-tool="sql">SQL Generator</a>
+                <a href="#json" class="nav-link" data-tool="json">JSON Beautifier</a>
+            </nav>
+        </aside>
+
+        <!-- ===== Main Content ===== -->
+        <main class="main-content">
+            <!-- Tool: API Mocker -->
+            <div id="tool-mockify" class="tool-container">
+                <header class="tool-header">
+                    <h2>Instant API Mocker</h2>
+                    <p>Paste any valid JSON to generate an instant, shareable mock API endpoint.</p>
+                </header>
+                <div class="tool-body">
+                    <textarea id="mockify-input" class="code-input" placeholder='{ "message": "Hello, DevKit!" }'></textarea>
+                    <button id="mockify-submit" class="btn btn-primary">Create Mock API</button>
+                    <div id="mockify-result" class="result-box hidden"></div>
+                </div>
+            </div>
+
+            <!-- Tool: Regex Builder -->
+            <div id="tool-regex" class="tool-container hidden">
+                <header class="tool-header">
+                    <h2>AI-Powered Regex Builder</h2>
+                    <p>Describe what you want to match in plain English, and let AI build the regex for you.</p>
+                </header>
+                <div class="tool-body">
+                    <input type="text" id="regex-input" class="text-input" placeholder="e.g., a valid email address">
+                    <button id="regex-submit" class="btn btn-primary">Generate Regex</button>
+                    <div id="regex-result" class="result-box hidden"></div>
+                </div>
+            </div>
+
+            <!-- Tool: Config Converter -->
+            <div id="tool-config" class="tool-container hidden">
+                <header class="tool-header">
+                    <h2>Universal Config Converter</h2>
+                    <p>Seamlessly convert between JSON, YAML, and TOML formats.</p>
+                </header>
+                <div class="tool-body io-grid">
+                    <div class="io-panel">
+                        <div class="io-header">
+                            <label for="config-from">From:</label>
+                            <select id="config-from">
+                                <option value="json">JSON</option><option value="yaml">YAML</option><option value="toml">TOML</option>
+                            </select>
+                        </div>
+                        <textarea id="config-input" class="code-input" placeholder="Paste your config here..."></textarea>
+                    </div>
+                    <div class="io-panel">
+                        <div class="io-header">
+                            <label for="config-to">To:</label>
+                            <select id="config-to">
+                                <option value="yaml">YAML</option><option value="json">JSON</option><option value="toml">TOML</option>
+                            </select>
+                        </div>
+                        <textarea id="config-output" class="code-input" readonly></textarea>
+                    </div>
+                </div>
+                 <button id="config-submit" class="btn btn-primary">Convert</button>
+            </div>
+
+            <!-- Tool: SQL Generator -->
+            <div id="tool-sql" class="tool-container hidden">
+                <header class="tool-header">
+                    <h2>AI-Powered SQL Generator</h2>
+                    <p>Provide your table schema and describe the data you need in plain English.</p>
+                </header>
+                <div class="tool-body io-grid">
+                    <textarea id="sql-schema" class="code-input" placeholder="CREATE TABLE users (...);"></textarea>
+                    <textarea id="sql-description" class="code-input" placeholder="e.g., Show me all users from California who signed up this year."></textarea>
+                </div>
+                <button id="sql-submit" class="btn btn-primary">Generate SQL</button>
+                <div id="sql-result" class="result-box hidden"></div>
+            </div>
+
+            <!-- Tool: JSON Beautifier -->
+            <div id="tool-json" class="tool-container hidden">
+                <header class="tool-header">
+                    <h2>JSON Beautifier & Validator</h2>
+                    <p>Paste any JSON to format it beautifully and check for syntax errors.</p>
+                </header>
+                <div class="tool-body">
+                    <textarea id="json-input" class="code-input" placeholder='{"user":{"id":1,"name":"DevKit"}}'></textarea>
+                    <button id="json-submit" class="btn btn-primary">Format JSON</button>
+                    <div id="json-result" class="result-box hidden"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
